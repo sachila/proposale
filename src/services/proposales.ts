@@ -101,6 +101,39 @@ export const createProposal = async (input: CreateProposalInput) => {
   return res.json() as Promise<ProposalMutationResponse>;
 };
 
+export const deleteContent = async (opts: {
+  productId?: number;
+  variationId?: number;
+}) => {
+  const apiKey = process.env.PROPOSALES_API_KEY;
+  if (!apiKey) throw new Error("PROPOSALES_API_KEY is not set");
+
+  const url = new URL("/v3/content", BASE_URL);
+  if (opts.productId) {
+    url.searchParams.set("product_id", String(opts.productId));
+  }
+  if (opts.variationId) {
+    url.searchParams.set("variation_id", String(opts.variationId));
+  }
+
+  const res = await fetch(url, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${apiKey}` },
+  });
+
+  if (!res.ok) {
+    const body = await res.json().catch(() => null);
+    throw new ProposalesApiError(
+      body?.error?.message ?? `Proposales API request failed (${res.status})`,
+      res.status,
+    );
+  }
+
+  return res.json() as Promise<{
+    data: { success: boolean; message: string };
+  }>;
+};
+
 export const patchProposalData = async (
   uuid: string,
   data: Record<string, string>,

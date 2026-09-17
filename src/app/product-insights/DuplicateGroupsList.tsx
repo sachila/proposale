@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { DuplicateItemRow } from "./DuplicateItemRow";
 
 type DuplicateGroup = {
   label: string;
@@ -39,6 +40,7 @@ const DuplicateGroupsList = ({
   const [dismissed, setDismissed] = useState<Set<string>>(() =>
     loadDismissed(companyId),
   );
+  const [deletedIds, setDeletedIds] = useState<Set<number>>(new Set());
 
   const dismiss = (key: string) => {
     setDismissed((prev) => {
@@ -53,7 +55,17 @@ const DuplicateGroupsList = ({
     });
   };
 
-  const visible = groups.filter((group) => !dismissed.has(groupKey(group)));
+  const markDeleted = (id: number) => {
+    setDeletedIds((prev) => new Set(prev).add(id));
+  };
+
+  const visible = groups
+    .filter((group) => !dismissed.has(groupKey(group)))
+    .map((group) => ({
+      ...group,
+      variationIds: group.variationIds.filter((id) => !deletedIds.has(id)),
+    }))
+    .filter((group) => group.variationIds.length >= 2);
 
   if (visible.length === 0) {
     return <p className="text-zinc-300">No likely duplicates found.</p>;
@@ -71,9 +83,15 @@ const DuplicateGroupsList = ({
             <div>
               <p className="font-medium">{group.label}</p>
               <p className="mb-1 text-sm text-zinc-400">{group.reason}</p>
-              <ul className="list-inside list-disc text-sm text-zinc-300">
+              <ul className="space-y-1 text-sm text-zinc-300">
                 {group.variationIds.map((id) => (
-                  <li key={id}>{titleByVariationId[id] ?? `#${id}`}</li>
+                  <DuplicateItemRow
+                    key={id}
+                    id={id}
+                    title={titleByVariationId[id] ?? `#${id}`}
+                    companyId={companyId}
+                    onDeleted={markDeleted}
+                  />
                 ))}
               </ul>
             </div>
