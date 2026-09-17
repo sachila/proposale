@@ -37,9 +37,15 @@ const AiProposalePage = () => {
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-6 bg-zinc-50 px-6 py-16 text-center dark:bg-black">
       {!isPending && (
-        <h1 className="text-2xl font-semibold text-black dark:text-zinc-50">
-          AI Proposal
-        </h1>
+        <div className="flex flex-col gap-2">
+          <h1 className="text-2xl font-semibold text-black dark:text-zinc-50">
+            AI Proposal
+          </h1>
+          <p className="max-w-lg text-sm text-zinc-600 dark:text-zinc-400">
+            Describe what the client needs in plain text, and get a draft
+            proposal built from your Proposales content library.
+          </p>
+        </div>
       )}
 
       {error && <p className="text-red-600 dark:text-red-400">{error}</p>}
