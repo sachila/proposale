@@ -7,6 +7,7 @@ const links = [
   { href: "/", label: "AI Proposal" },
   { href: "/dashboard", label: "Dashboard" },
   { href: "/product-insights", label: "Product Insights" },
+  { href: "/expiring-proposals", label: "Expiring Soon" },
   { href: "/roast", label: "Roast" },
 ];
 

@@ -2,6 +2,7 @@ import {
   Company,
   ContentItem,
   CreateProposalInput,
+  ExpiringProposal,
   Proposal,
   ProposalMutationResponse,
   ProposalSearchResult,
@@ -63,6 +64,39 @@ export const searchProposals = (opts: {
 
 export const getProposal = (uuid: string) => {
   return proposalesFetch<{ data: Proposal }>(`/v3/proposals/${uuid}`);
+};
+
+export const listExpiringProposals = async (
+  companyId?: number,
+): Promise<ExpiringProposal[]> => {
+  const { data: candidates } = await searchProposals({
+    companyId,
+    limit: 25,
+    excludeRevisionDrafts: true,
+  });
+
+  const active = candidates.filter((p) => p.status === "active");
+  const proposals = await Promise.all(active.map((p) => getProposal(p.uuid)));
+
+  const now = Date.now();
+  const in24h = now + 24 * 60 * 60 * 1000;
+
+  return proposals
+    .map(({ data }) => data)
+    .filter((p) => {
+      if (!p.expires_at) return false;
+      const expiresAtMs = new Date(p.expires_at).getTime();
+      return expiresAtMs > now && expiresAtMs <= in24h;
+    })
+    .map((p) => ({
+      uuid: p.uuid,
+      title: p.title,
+      recipientName: p.recipient_name,
+      recipientEmail: p.recipient_email,
+      expiresAt: new Date(p.expires_at as number).getTime(),
+      url: p.url,
+    }))
+    .sort((a, b) => a.expiresAt - b.expiresAt);
 };
 
 export const listContent = (opts: { companyId?: number }) => {

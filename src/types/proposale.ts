@@ -87,6 +87,19 @@ export type Proposal = {
   tracking: ProposalTracking;
   recipient_name: string | null;
   recipient_company_name: string | null;
+  recipient_email: string | null;
+  expires_at: number | null;
+  pending?: boolean;
+  url?: string;
+};
+
+export type ExpiringProposal = {
+  uuid: string;
+  title: string | null;
+  recipientName: string | null;
+  recipientEmail: string | null;
+  expiresAt: number;
+  url?: string;
 };
 
 export type ContentItem = {
